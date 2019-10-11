@@ -1,1 +1,1 @@
-# searc-algorithms
+# search-algorithms
