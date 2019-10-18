@@ -89,8 +89,7 @@ vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
 	q.push(make_pair(y, x));
 
-	int new_i = -1;
-	int new_j = -1;
+	int new_i = -1, new_j = -1;
 
 	while (!q.empty() && !finished) {
 		pair<int, int> actual = q.front();
@@ -133,7 +132,7 @@ vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
 vector<pair<int, int>> best_first(vector<vector<char>> board, int x, int y) {
 
-	vector<pair<int, int>> v;
+	pair<int, int> path[board.size()][board[0].size()];
 	bool visited[board.size()][board[0].size()];
 	bool finished = false;
 
@@ -147,6 +146,8 @@ vector<pair<int, int>> best_first(vector<vector<char>> board, int x, int y) {
 
 	q.push(make_pair(0, make_pair(y, x)));
 
+	int new_i = -1, new_j = -1;
+
 	while (!q.empty() && !finished) {
 		triple front = q.top();
 		pair<int, int> actual = front.second;
@@ -154,17 +155,17 @@ vector<pair<int, int>> best_first(vector<vector<char>> board, int x, int y) {
 
 		//think about possibility to do it in other order
 		for (int i = 0; i < 8; i++) {
-			int new_i = actual.first + directions[i].first;
-			int new_j = actual.second + directions[i].second;
+			new_i = actual.first + directions[i].first;
+			new_j = actual.second + directions[i].second;
 			int weight = sqrt(pow(y - new_i, 2) + pow(x - new_j, 2));
 
 			if (in_limits(board.size(), board[0].size(), new_i, new_j)
 				&& !visited[new_i][new_j]) {
+				path[new_i][new_j] = actual;
 				if (board[new_i][new_j] == '*') {
 					visited[new_i][new_j] = true;
 					q.push(make_pair(weight, make_pair(new_i, new_j)));
 				} else if (board[new_i][new_j] == '$') {
-					cout << "end at: " << new_i << ", " << new_j << endl;
 					finished = true;
 					break;
 				}
@@ -173,7 +174,17 @@ vector<pair<int, int>> best_first(vector<vector<char>> board, int x, int y) {
 
 	}
 
-	return v;	
+	vector<pair<int, int>> result;
+	result.push_back(make_pair(new_i, new_j));
+
+	while (new_i != y || new_j != x) {
+		pair<int, int> actual = path[new_i][new_j];
+		result.push_back(actual);
+		new_i = actual.first;
+		new_j = actual.second;
+	}
+
+	return result;
 
 }
 
@@ -185,7 +196,7 @@ int diagonal_distance(int i, int j, int end_i, int end_j) {
 
 vector<pair<int, int>> a_star(vector<vector<char>> board, int x, int y, int end_i, int end_j) {
 
-	vector<pair<int, int>> v;
+	pair<int, int> path[board.size()][board[0].size()];
 	bool visited[board.size()][board[0].size()];
 	int cost[board.size()][board[0].size()];
 	bool finished = false;
@@ -196,6 +207,8 @@ vector<pair<int, int>> a_star(vector<vector<char>> board, int x, int y, int end_
 			cost[i][j] = INT_MAX;
 		}
 	}
+
+	int new_i = -1, new_j = -1;
 
 	priority_queue<triple, vector<triple>, greater<triple>> q;
 
@@ -208,19 +221,19 @@ vector<pair<int, int>> a_star(vector<vector<char>> board, int x, int y, int end_
 
 		//think about possibility to do it in other order
 		for (int i = 0; i < 8; i++) {
-			int new_i = actual.first + directions[i].first;
-			int new_j = actual.second + directions[i].second;
+			new_i = actual.first + directions[i].first;
+			new_j = actual.second + directions[i].second;
 			cost[new_i][new_j] = cost[actual.first][actual.second] 
 						+ sqrt(pow(y - new_i, 2) + pow(x - new_j, 2))
 						+ diagonal_distance(new_i, new_j, end_i, end_j);
 
 			if (in_limits(board.size(), board[0].size(), new_i, new_j)
 				&& !visited[new_i][new_j]) {
+				path[new_i][new_j] = actual;
 				if (board[new_i][new_j] == '*') {
 					visited[new_i][new_j] = true;
 					q.push(make_pair(cost[new_i][new_j], make_pair(new_i, new_j)));
 				} else if (board[new_i][new_j] == '$') {
-					cout << "end at: " << new_i << ", " << new_j << endl;
 					finished = true;
 					break;
 				}
@@ -228,9 +241,18 @@ vector<pair<int, int>> a_star(vector<vector<char>> board, int x, int y, int end_
 		}
 
 	}
+	
+	vector<pair<int, int>> result;
+	result.push_back(make_pair(new_i, new_j));
 
-	return v;	
+	while (new_i != y || new_j != x) {
+		pair<int, int> actual = path[new_i][new_j];
+		result.push_back(actual);
+		new_i = actual.first;
+		new_j = actual.second;
+	}
 
+	return result;
 
 }
 
@@ -273,11 +295,20 @@ int main(int argc, char const *argv[])
 	vector<pair<int, int>> path = bfs(board, x, y);
 	vector<vector<char>> result = write_result(board, path);
 	print_board(result);
-	// cout << "Busca Best-first Search" << endl;
-	// best_first(board, x, y);
-	// cout << "Busca A*" << endl;
-	// a_star(board, x, y, end_i, end_j);
 
+	cout << endl;
+	cout << "===================" << endl << endl;
+	cout << "Busca Best-first Search" << endl;
+	path = best_first(board, x, y);
+	result = write_result(board, path);
+	print_board(result);
+	
+	cout << endl;
+	cout << "===================" << endl << endl;
+	cout << "Busca A*" << endl;
+	path = a_star(board, x, y, end_i, end_j);
+	result = write_result(board, path);
+	print_board(result);
 
 	return 0;
 }
