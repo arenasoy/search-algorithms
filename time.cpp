@@ -1,10 +1,3 @@
-/*
-	Alunos:
-	Ana Carolina Fainelo de Oliveira 10284542
-	Carolina Arenas Okawa 10258876
-	Lui Franco Rocha 10295558
-*/
-
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -317,52 +310,36 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	clock_t start;
-	cout << "Busca em profundidade" << endl;
-	start = clock();
-	vector<pair<int, int>> path = dfs(board, x, y);
-	vector<vector<char>> result = write_result(board, path);
-	print_board(result);
-	double duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
-	cout << "cost: " << calculate_cost(path) << endl;
-	cout << "visited nodes_dfs: " << nodes_dfs << endl;
-	cout << "time " << duration << endl;	
+	double dfs_media = 0;
+	double bfs_media = 0;
+	double best_media = 0;
+	double a_media = 0;
 
-	cout << endl;
-	cout << "===================" << endl << endl;
-	cout << "Busca em largura" << endl;
-	start = clock();
-	path = bfs(board, x, y);
-	result = write_result(board, path);
-	print_board(result);
-	duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
-	cout << "cost: " << calculate_cost(path) << endl;
-	cout << "visited nodes: " << nodes_bfs << endl;
-	cout << "time " << duration << endl;	
+	for (int i = 0; i < 10000; i++) {
 
-	cout << endl;
-	cout << "===================" << endl << endl;
-	cout << "Busca Best-first Search" << endl;
-	start = clock();
-	path = best_first(board, x, y);
-	result = write_result(board, path);
-	print_board(result);
-	duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
-	cout << "cost: " << calculate_cost(path) << endl;
-	cout << "visited nodes: " << nodes_best_first << endl;
-	cout << "time " << duration << endl;	
-	
-	cout << endl;
-	cout << "===================" << endl << endl;
-	cout << "Busca A*" << endl;
-	start = clock();
-	path = a_star(board, x, y, end_i, end_j);
-	result = write_result(board, path);
-	print_board(result);
-	duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
-	cout << "cost: " << calculate_cost(path) << endl;
-	cout << "visited nodes: " << nodes_a_star << endl;
-	cout << "time " << duration << endl;	
+		clock_t start;
+		start = clock();
+		vector<pair<int, int>> path = dfs(board, x, y);
+		double duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
+		dfs_media += duration;
+
+		start = clock();
+		path = bfs(board, x, y);
+		duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
+		bfs_media += duration;
+
+		start = clock();
+		path = best_first(board, x, y);
+		duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
+		best_media += duration;
+
+		start = clock();
+		path = a_star(board, x, y, end_i, end_j);
+		duration = ( clock() - start ) / (double) (CLOCKS_PER_SEC/1000);
+		a_media += duration;
+	}
+
+	cout << "dfs: " << dfs_media/10000 << " bfs: " << bfs_media/10000 << " best: " << best_media/10000 << " a: " << a_media/10000 << endl;
 
 	return 0;
 }

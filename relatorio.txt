@@ -1,0 +1,3 @@
+heuristica de distancia diagonal -> pq é válida quando usamos 8 direções
+mudar a ordem dentro do vetor de distâncias influencia no resultado? -> ideia pra testes
+mt pequeno (in) deram todos iguais
