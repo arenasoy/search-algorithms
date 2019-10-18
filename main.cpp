@@ -2,6 +2,8 @@
 
 using namespace std;
 
+typedef pair<int, pair<int, int>> triple;
+
 pair<int, int> directions[] = {
 	make_pair(-1, -1), make_pair(0, -1), make_pair(1, -1),
 	make_pair(-1, 0), make_pair(1, 0),
@@ -114,6 +116,48 @@ vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
 vector<pair<int, int>> best_first(vector<vector<char>> board, int x, int y) {
 
+	vector<pair<int, int>> v;
+	bool visited[board.size()][board[0].size()];
+	bool finished = false;
+
+	for (int i = 0; i < board.size(); i++) {
+		for (int j = 0; j < board[0].size(); j++) {
+			visited[i][j] = false;
+		}
+	}
+
+	priority_queue<triple, vector<triple>, greater<triple>> q;
+
+	q.push(make_pair(0, make_pair(y, x)));
+
+	while (!q.empty() && !finished) {
+		triple front = q.top();
+		pair<int, int> actual = front.second;
+		q.pop();
+
+		//think about possibility to do it in other order
+		for (int i = 0; i < 8; i++) {
+			int new_i = actual.first + directions[i].first;
+			int new_j = actual.second + directions[i].second;
+			int weight = sqrt(pow(y - new_i, 2) + pow(x - new_j, 2));
+
+			if (in_limits(board.size(), board[0].size(), new_i, new_j)
+				&& !visited[new_i][new_j]) {
+				if (board[new_i][new_j] == '*') {
+					visited[new_i][new_j] = true;
+					q.push(make_pair(weight, make_pair(new_i, new_j)));
+				} else if (board[new_i][new_j] == '$') {
+					cout << "end at: " << new_i << ", " << new_j << endl;
+					finished = true;
+					break;
+				}
+			}
+		}
+
+	}
+
+	return v;	
+
 }
 
 vector<pair<int, int>> a_star(vector<vector<char>> board, int x, int y) {
@@ -152,8 +196,8 @@ int main(int argc, char const *argv[])
 	dfs(board, x, y);
 	cout << "Busca em largura" << endl;
 	bfs(board, x, y);
-	// cout << "Busca Best-first Search" << endl;
-	// best_first(board, x, y);
+	cout << "Busca Best-first Search" << endl;
+	best_first(board, x, y);
 	// cout << "Busca A*" << endl;
 	// a_star(board, x, y);
 
