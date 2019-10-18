@@ -6,8 +6,8 @@ typedef pair<int, pair<int, int>> triple;
 
 pair<int, int> directions[] = {
 	make_pair(-1, -1), make_pair(0, -1), make_pair(1, -1),
-	make_pair(-1, 0), make_pair(1, 0),
-	make_pair(-1, 1), make_pair(0, 1), make_pair(1, 1)};
+	make_pair(1, 0), make_pair(1, 1), make_pair(0, 1), 
+	make_pair(-1, 1), make_pair(-1, 0)};
 
 bool in_limits(int n, int m, int i, int j) {
 	if (i < 0 || j < 0 || i >= n || j >= m) return false;
@@ -31,9 +31,8 @@ vector<vector<char>> write_result(vector<vector<char>> board, vector<pair<int, i
 	return board;
 }
 
-vector<pair<int, int>> dfs_recursive(vector<vector<char>> board, bool **visited, int y, int x, vector<pair<int, int>> path) {
+bool dfs_recursive(vector<vector<char>> board, bool **visited, int y, int x, vector<pair<int, int>> &path) {
 
-	vector<pair<int, int>> v;
 	visited[y][x] = true;
 
 	for (int i = 0; i < 8; i++) {
@@ -44,18 +43,16 @@ vector<pair<int, int>> dfs_recursive(vector<vector<char>> board, bool **visited,
 			&& !visited[new_i][new_j]) {
 			if (board[new_i][new_j] == '*') {
 				path.push_back(make_pair(new_i, new_j));
-				cout << "adicionando: " << new_i << ", " << new_j << endl;
-				v = dfs_recursive(board, visited, new_i, new_j, path);
+				if (dfs_recursive(board, visited, new_i, new_j, path)) break;
 				path.pop_back();
-
-				cout << "adicionando: " << new_i << ", " << new_j << endl;
 			} else if (board[new_i][new_j] == '$') {
-				return path;
+				path.push_back(make_pair(new_i, new_j));
+				return true;
 			}
 		}
 	}
 
-	return v;
+	return true;
 }
 
 vector<pair<int, int>> dfs(vector<vector<char>> board, int x, int y) {
@@ -70,7 +67,9 @@ vector<pair<int, int>> dfs(vector<vector<char>> board, int x, int y) {
 
 	bool finished = false;
 	vector<pair<int, int>> path;
-	return dfs_recursive(board, visited, y, x, path);
+	path.push_back(make_pair(y, x));
+	dfs_recursive(board, visited, y, x, path);
+	return path;
 }
 
 vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
@@ -287,13 +286,16 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	// cout << "Busca em profundidade" << endl;
-	// vector<pair<int, int>> path = dfs(board, x, y);
-	// vector<vector<char>> result = write_result(board, path);
-	// print_board(result);
-	cout << "Busca em largura" << endl;
-	vector<pair<int, int>> path = bfs(board, x, y);
+	cout << "Busca em profundidade" << endl;
+	vector<pair<int, int>> path = dfs(board, x, y);
 	vector<vector<char>> result = write_result(board, path);
+	print_board(result);
+
+	cout << endl;
+	cout << "===================" << endl << endl;
+	cout << "Busca em largura" << endl;
+	path = bfs(board, x, y);
+	result = write_result(board, path);
 	print_board(result);
 
 	cout << endl;
