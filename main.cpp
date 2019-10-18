@@ -31,7 +31,7 @@ vector<vector<char>> write_result(vector<vector<char>> board, vector<pair<int, i
 	return board;
 }
 
-vector<pair<int, int>> dfs_recursive(vector<vector<char>> board, bool **visited, int y, int x) {
+vector<pair<int, int>> dfs_recursive(vector<vector<char>> board, bool **visited, int y, int x, vector<pair<int, int>> path) {
 
 	vector<pair<int, int>> v;
 	visited[y][x] = true;
@@ -43,10 +43,14 @@ vector<pair<int, int>> dfs_recursive(vector<vector<char>> board, bool **visited,
 		if (in_limits(board.size(), board[0].size(), new_i, new_j)
 			&& !visited[new_i][new_j]) {
 			if (board[new_i][new_j] == '*') {
-				dfs_recursive(board, visited, new_i, new_j);
+				path.push_back(make_pair(new_i, new_j));
+				cout << "adicionando: " << new_i << ", " << new_j << endl;
+				v = dfs_recursive(board, visited, new_i, new_j, path);
+				path.pop_back();
+
+				cout << "adicionando: " << new_i << ", " << new_j << endl;
 			} else if (board[new_i][new_j] == '$') {
-				cout << "end at: " << new_i << ", " << new_j << endl;
-				return v;
+				return path;
 			}
 		}
 	}
@@ -65,13 +69,13 @@ vector<pair<int, int>> dfs(vector<vector<char>> board, int x, int y) {
 	}
 
 	bool finished = false;
-
-	return dfs_recursive(board, visited, y, x);
+	vector<pair<int, int>> path;
+	return dfs_recursive(board, visited, y, x, path);
 }
 
 vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
-	vector<pair<int, int>> v;
+	pair<int, int> path[board.size()][board[0].size()];
 	bool visited[board.size()][board[0].size()];
 	bool finished = false;
 
@@ -85,22 +89,25 @@ vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
 	q.push(make_pair(y, x));
 
+	int new_i = -1;
+	int new_j = -1;
+
 	while (!q.empty() && !finished) {
 		pair<int, int> actual = q.front();
 		q.pop();
 
 		//think about possibility to do it in other order
 		for (int i = 0; i < 8; i++) {
-			int new_i = actual.first + directions[i].first;
-			int new_j = actual.second + directions[i].second;
+			new_i = actual.first + directions[i].first;
+			new_j = actual.second + directions[i].second;
 
 			if (in_limits(board.size(), board[0].size(), new_i, new_j)
 				&& !visited[new_i][new_j]) {
+				path[new_i][new_j] = actual;
 				if (board[new_i][new_j] == '*') {
 					visited[new_i][new_j] = true;
 					q.push(make_pair(new_i, new_j));
 				} else if (board[new_i][new_j] == '$') {
-					cout << "end at: " << new_i << ", " << new_j << endl;
 					finished = true;
 					break;
 				}
@@ -109,7 +116,17 @@ vector<pair<int, int>> bfs(vector<vector<char>> board, int x, int y) {
 
 	}
 
-	return v;
+	vector<pair<int, int>> result;
+	result.push_back(make_pair(new_i, new_j));
+
+	while (new_i != y || new_j != x) {
+		pair<int, int> actual = path[new_i][new_j];
+		result.push_back(actual);
+		new_i = actual.first;
+		new_j = actual.second;
+	}
+
+	return result;
 
 }
 
@@ -248,14 +265,18 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	cout << "Busca em profundidade" << endl;
-	dfs(board, x, y);
+	// cout << "Busca em profundidade" << endl;
+	// vector<pair<int, int>> path = dfs(board, x, y);
+	// vector<vector<char>> result = write_result(board, path);
+	// print_board(result);
 	cout << "Busca em largura" << endl;
-	bfs(board, x, y);
-	cout << "Busca Best-first Search" << endl;
-	best_first(board, x, y);
-	cout << "Busca A*" << endl;
-	a_star(board, x, y, end_i, end_j);
+	vector<pair<int, int>> path = bfs(board, x, y);
+	vector<vector<char>> result = write_result(board, path);
+	print_board(result);
+	// cout << "Busca Best-first Search" << endl;
+	// best_first(board, x, y);
+	// cout << "Busca A*" << endl;
+	// a_star(board, x, y, end_i, end_j);
 
 
 	return 0;
